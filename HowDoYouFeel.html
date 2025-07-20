@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LIFF 画像選択アプリ</title>
+    <!-- スタイルは前回と同じ -->
+    <style>
+        body { text-align: center; font-family: sans-serif; }
+        img { width: 150px; height: 150px; margin: 10px; cursor: pointer; border: 2px solid #ddd; border-radius: 10px; transition: transform 0.2s; }
+        img:hover { transform: scale(1.05); }
+        .hidden { display: none; } /* 読み込み中コンテンツを隠すクラス */
+    </style>
+</head>
+<body>
+
+    <div id="loading">読み込み中...</div>
+
+    <div id="content" class="hidden">
+        <h1>好きな画像をクリックしてください</h1>
+        <p>クリックすると、このトークルームにメッセージが送信されます。</p>
+
+        <img src="image1.png" alt="画像1" data-message="りんごが好きです！">
+        <img src="image2.png" alt="画像2" data-message="バナナが好きです！">
+        <img src="image3.png" alt="画像3" data-message="ぶどうが好きです！">
+    </div>
+
+    <!-- LIFF SDKを読み込む -->
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+
+    <script>
+        // メインの処理を非同期関数として定義
+        async function main() {
+            // LIFFを初期化
+            // ここにあなたのLIFF IDを入力してください
+            await liff.init({ liffId: "2007626363-DNnJmy4Z" });
+
+            // LINEにログインしているかチェック
+            if (!liff.isLoggedIn()) {
+                // ログインしていなければ、ログインを促す
+                liff.login();
+                return; // ログイン処理に移行するため、ここで処理を中断
+            }
+
+            // 読み込み表示を消して、コンテンツを表示
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('content').classList.remove('hidden');
+
+            // すべてのimg要素を取得
+            const images = document.querySelectorAll('img');
+
+            // 各画像にクリックイベントを設定
+            images.forEach(image => {
+                image.addEventListener('click', async () => {
+                    const message = image.dataset.message;
+
+                    try {
+                        // メッセージを送信
+                        await liff.sendMessages([
+                            {
+                                type: 'text',
+                                text: message
+                            }
+                        ]);
+                        // 送信後にLIFFウィンドウを閉じる
+                        liff.closeWindow();
+                    } catch (error) {
+                        console.error(error);
+                        window.alert('メッセージの送信に失敗しました。');
+                    }
+                });
+            });
+        }
+
+        // 実行
+        main();
+    </script>
+
+</body>
+</html>
