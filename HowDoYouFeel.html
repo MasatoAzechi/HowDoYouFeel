@@ -3,63 +3,535 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LIFF 画像選択アプリ</title>
-    <!-- スタイルは前回と同じ -->
+    <title>感情カテゴリ一覧 - きもちチャート</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #87CEEB, #B0E0E6);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            border: 4px solid #4ECDC4;
+        }
+        
+        .title {
+            text-align: center;
+            font-size: 2.5em;
+            color: #FF6B35;
+            font-weight: bold;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .category-section {
+            margin-bottom: 40px;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .category-title {
+            font-size: 1.4em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 10px;
+            text-align: center;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+        
+        .emotion-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+        }
+        
+        .emotion-card {
+            text-align: center;
+            padding: 15px;
+            border-radius: 12px;
+            background: white;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+            border: 2px solid #E9ECEF;
+        }
+        
+        .emotion-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+        
+        .emotion-face {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            margin: 0 auto 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5em;
+            border: 3px solid #DDD;
+            background: #F8F9FA;
+        }
+        
+        .emotion-label {
+            font-size: 1em;
+            font-weight: bold;
+            color: #2C3E50;
+        }
+        
+        /* カテゴリ別の色分け */
+        .interest { background: linear-gradient(135deg, #FFE4B5, #FFF8DC); }
+        .interest .category-title { background: linear-gradient(135deg, #FF8C00, #FFA500); }
+        
+        .stable { background: linear-gradient(135deg, #E0FFE0, #F0FFF0); }
+        .stable .category-title { background: linear-gradient(135deg, #32CD32, #90EE90); }
+        
+        .achievement { background: linear-gradient(135deg, #FFEFD5, #FFF8DC); }
+        .achievement .category-title { background: linear-gradient(135deg, #DAA520, #FFD700); }
+        
+        .joy { background: linear-gradient(135deg, #FFB6C1, #FFC0CB); }
+        .joy .category-title { background: linear-gradient(135deg, #FF69B4, #FF1493); }
+        
+        .tension { background: linear-gradient(135deg, #F0E68C, #FFFFE0); }
+        .tension .category-title { background: linear-gradient(135deg, #DAA520, #B8860B); }
+        
+        .anxiety { background: linear-gradient(135deg, #E6E6FA, #F8F8FF); }
+        .anxiety .category-title { background: linear-gradient(135deg, #9370DB, #8A2BE2); }
+        
+        .physical { background: linear-gradient(135deg, #FFE4E1, #FFEBCD); }
+        .physical .category-title { background: linear-gradient(135deg, #CD853F, #D2691E); }
+        
+        .confusion { background: linear-gradient(135deg, #F5DEB3, #FAEBD7); }
+        .confusion .category-title { background: linear-gradient(135deg, #D2691E, #A0522D); }
+        
+        .anger { background: linear-gradient(135deg, #FFE4E1, #MISTYROSE); }
+        .anger .category-title { background: linear-gradient(135deg, #DC143C, #B22222); }
+        
+        .tired { background: linear-gradient(135deg, #D3D3D3, #DCDCDC); }
+        .tired .category-title { background: linear-gradient(135deg, #708090, #696969); }
+        
+        .unmotivated { background: linear-gradient(135deg, #F5F5F5, #E5E5E5); }
+        .unmotivated .category-title { background: linear-gradient(135deg, #A9A9A9, #808080); }
+        
+        .pride { background: linear-gradient(135deg, #FFEFD5, #PAPAYAWHIP); }
+        .pride .category-title { background: linear-gradient(135deg, #FF8C00, #FF4500); }
+        
+        .inferiority { background: linear-gradient(135deg, #E6F3FF, #F0F8FF); }
+        .inferiority .category-title { background: linear-gradient(135deg, #4682B4, #5F9EA0); }
+        
+        .social { background: linear-gradient(135deg, #FFEBCD, #F5DEB3); }
+        .social .category-title { background: linear-gradient(135deg, #CD853F, #BC8F8F); }
+        
+        .surprise { background: linear-gradient(135deg, #FFFACD, #LEMONCHIFFON); }
+        .surprise .category-title { background: linear-gradient(135deg, #F0E68C, #DAA520); }
+        
+        .disgust { background: linear-gradient(135deg, #E0E0E0, #F0F0F0); }
+        .disgust .category-title { background: linear-gradient(135deg, #696969, #2F4F4F); }
+        
+        .sadness { background: linear-gradient(135deg, #E6F3FF, #F0F8FF); }
+        .sadness .category-title { background: linear-gradient(135deg, #4169E1, #6495ED); }
+        
+        @media (max-width: 768px) {
+            .emotion-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .title {
+                font-size: 2em;
+            }
+        }
+    </style>
     <style>
         body { text-align: center; font-family: sans-serif; }
         img { width: 150px; height: 150px; margin: 10px; cursor: pointer; border: 2px solid #ddd; border-radius: 10px; transition: transform 0.2s; }
         img:hover { transform: scale(1.05); }
         .hidden { display: none; } /* 読み込み中コンテンツを隠すクラス */
     </style>
+
 </head>
 <body>
-
-    <div id="loading">読み込み中...</div>
+    <div id="loading">・読み込み中...</div>
 
     <div id="content" class="hidden">
-        <h1>好きな画像をクリックしてください</h1>
-        <p>クリックすると、このトークルームにメッセージが送信されます。</p>
-
-        <img src="image1.png" alt="画像1" data-message="りんごが好きです！">
-        <img src="image2.png" alt="画像2" data-message="バナナが好きです！">
-        <img src="image3.png" alt="画像3" data-message="ぶどうが好きです！">
+    <div class="container">
+        <h1 class="title">感情カテゴリ一覧 - きもちチャート</h1>
+        
+        <!-- 興味関心系 -->
+        <div class="category-section interest">
+            <div class="category-title">興味関心系</div>
+            <div class="emotion-grid">
+                <div class="emotion-card">
+                    <div class="emotion-face">🤔</div>
+                    <div class="emotion-label">おもしろい</div>
+                </div>
+                <div class="emotion-card">
+                    <div class="emotion-face">✨</div>
+                    <div class="emotion-label">きょうみある</div>
+                </div>
+                <div class="emotion-card">
+                    <div class="emotion-face">🚀</div>
+                    <div class="emotion-label">やってみたい</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 安定安心系 -->
+        <div class="category-section stable">
+            <div class="category-title">安定安心系</div>
+            <div class="emotion-grid">
+                <div class="emotion-card">
+                    <div class="emotion-face">😌</div>
+                    <div class="emotion-label">ほっとする</div>
+                </div>
+                <div class="emotion-card">
+                    <div class="emotion-face">😊</div>
+                    <div class="emotion-label">しんぱいない</div>
+                </div>
+                <div class="emotion-card">
+                    <div class="emotion-face">😐</div>
+                    <div class="emotion-label">ふつう</div>
+                </div>
+                <div class="emotion-card">
+                    <div class="emotion-face">🧘</div>
+                    <div class="emotion-label">おちついてる</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 達成系 -->
+        <div class="category-section achievement">
+            <div class="category-title">達成系</div>
+            <div class="emotion-grid">
+                <div class="emotion-card">
+                    <div class="emotion-face">💪</div>
+                    <div class="emotion-label">がんばった</div>
+                </div>
+                <div class="emotion-card">
+                    <div class="emotion-face">🏆</div>
+                    <div class="emotion-label">やりきった</div>
+                </div>
+                <div class="emotion-card">
+                    <div class="emotion-face">😅</div>
+                    <div class="emotion-label">つかれたけどよかった</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 喜び系 -->
+        <div class="category-section joy">
+            <div class="category-title">喜び系</div>
+            <div class="emotion-grid">
+                <div class="emotion-card">
+                    <div class="emotion-face">😄</div>
+                    <div class="emotion-label">たのしい！</div>
+                </div>
+                <div class="emotion-card">
+                    <div class="emotion-face">😊</div>
+                    <div class="emotion-label">うれしい！</div>
+                </div>
+                <div class="emotion-card">
+                    <div class="emotion-face">🎉</div>
+                    <div class="emotion-label">やったー！</div>
+                </div>
+                <div class="emotion-card">
+                    <div class="emotion-face">😍</div>
+                    <div class="emotion-label">しあわせ</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 緊張興奮系 -->
+        <div class="category-section tension">
+            <div class="category-title">緊張興奮系</div>
+            <div class="emotion-grid">
+                <div class="emotion-card">
+                    <div class="emotion-face">😰</div>
+                    <div class="emotion-label">ちょっときんちょう</div>
+                </div>
+                <div class="emotion-card">
+                    <div class="emotion-face">😬</div>
+                    <div class="emotion-label">きんちょう</div>
+                </div>
+                <div class="emotion-card">
+                    <div class="emotion-face">💓</div>
+                    <div class="emotion-label">ドキドキ</div>
+                </div>
+                <div class="emotion-card">
+                    <div class="emotion-face">🤩</div>
+                    <div class="emotion-label">わくわくしてる！</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 不安系 -->
+        <div class="category-section anxiety">
+            <div class="category-title">不安系</div>
+            <div class="emotion-grid">
+                <div class="emotion-card">
+                    <div class="emotion-face">😟</div>
+                    <div class="emotion-label">しんぱい</div>
+                </div>
+                <div class="emotion-card">
+                    <div class="emotion-face">😨</div>
+                    <div class="emotion-label">こわい</div>
+                </div>
+                <div class="emotion-card">
+                    <div class="emotion-face">😰</div>
+                    <div class="emotion-label">ザワザワする</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 身体感覚系 -->
+        <div class="category-section physical">
+            <div class="category-title">身体感覚系</div>
+            <div class="emotion-grid">
+                <div class="emotion-card">
+                    <div class="emotion-face">🤢</div>
+                    <div class="emotion-label">おなかがぎゅーってなる</div>
+                </div>
+                <div class="emotion-card">
+                    <div class="emotion-face">🍽️</div>
+                    <div class="emotion-label">おなかすいた</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 認知混乱系 -->
+        <div class="category-section confusion">
+            <div class="category-title">認知混乱系</div>
+            <div class="emotion-grid">
+                <div class="emotion-card">
+                    <div class="emotion-face">🤨</div>
+                    <div class="emotion-label">なんか変</div>
+                </div>
+                <div class="emotion-card">
+                    <div class="emotion-face">😕</div>
+                    <div class="emotion-label">よくわかんない</div>
+                </div>
+                <div class="emotion-card">
+                    <div class="emotion-face">🌫️</div>
+                    <div class="emotion-label">モヤモヤ</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 怒り・混乱系 -->
+        <div class="category-section anger">
+            <div class="category-title">怒り・混乱系</div>
+            <div class="emotion-grid">
+                <div class="emotion-card">
+                    <div class="emotion-face">😠</div>
+                    <div class="emotion-label">ムカつく</div>
+                </div>
+                <div class="emotion-card">
+                    <div class="emotion-face">😤</div>
+                    <div class="emotion-label">イライラ</div>
+                </div>
+                <div class="emotion-card">
+                    <div class="emotion-face">🤬</div>
+                    <div class="emotion-label">バクハツしそう</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 疲労系 -->
+        <div class="category-section tired">
+            <div class="category-title">疲労系</div>
+            <div class="emotion-grid">
+                <div class="emotion-card">
+                    <div class="emotion-face">😴</div>
+                    <div class="emotion-label">つかれた</div>
+                </div>
+                <div class="emotion-card">
+                    <div class="emotion-face">😵</div>
+                    <div class="emotion-label">ぐったり</div>
+                </div>
+                <div class="emotion-card">
+                    <div class="emotion-face">🆘</div>
+                    <div class="emotion-label">もうムリ</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 意欲減退系 -->
+        <div class="category-section unmotivated">
+            <div class="category-title">意欲減退系</div>
+            <div class="emotion-grid">
+                <div class="emotion-card">
+                    <div class="emotion-face">😑</div>
+                    <div class="emotion-label">なんにもしたくない</div>
+                </div>
+                <div class="emotion-card">
+                    <div class="emotion-face">😶</div>
+                    <div class="emotion-label">ぼーっとする</div>
+                </div>
+                <div class="emotion-card">
+                    <div class="emotion-face">😪</div>
+                    <div class="emotion-label">やるきない</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 優越・誇り系 -->
+        <div class="category-section pride">
+            <div class="category-title">優越・誇り系</div>
+            <div class="emotion-grid">
+                <div class="emotion-card">
+                    <div class="emotion-face">😏</div>
+                    <div class="emotion-label">どーだ！</div>
+                </div>
+                <div class="emotion-card">
+                    <div class="emotion-face">🤩</div>
+                    <div class="emotion-label">すっげぇ</div>
+                </div>
+                <div class="emotion-card">
+                    <div class="emotion-face">🏅</div>
+                    <div class="emotion-label">できたぞ！</div>
+                </div>
+                <div class="emotion-card">
+                    <div class="emotion-face">⭐</div>
+                    <div class="emotion-label">すごい！</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 劣等・自信喪失系 -->
+        <div class="category-section inferiority">
+            <div class="category-title">劣等・自信喪失系</div>
+            <div class="emotion-grid">
+                <div class="emotion-card">
+                    <div class="emotion-face">😞</div>
+                    <div class="emotion-label">どうせダメ</div>
+                </div>
+                <div class="emotion-card">
+                    <div class="emotion-face">😔</div>
+                    <div class="emotion-label">うまくできない</div>
+                </div>
+                <div class="emotion-card">
+                    <div class="emotion-face">😟</div>
+                    <div class="emotion-label">がっかり</div>
+                </div>
+                <div class="emotion-card">
+                    <div class="emotion-face">😕</div>
+                    <div class="emotion-label">残念</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 社会的反応系 -->
+        <div class="category-section social">
+            <div class="category-title">社会的反応系</div>
+            <div class="emotion-grid">
+                <div class="emotion-card">
+                    <div class="emotion-face">😳</div>
+                    <div class="emotion-label">はずかしい</div>
+                </div>
+                <div class="emotion-card">
+                    <div class="emotion-face">🙄</div>
+                    <div class="emotion-label">いややねん</div>
+                </div>
+                <div class="emotion-card">
+                    <div class="emotion-face">😒</div>
+                    <div class="emotion-label">ばかにされた気がする</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 驚き系 -->
+        <div class="category-section surprise">
+            <div class="category-title">驚き系</div>
+            <div class="emotion-grid">
+                <div class="emotion-card">
+                    <div class="emotion-face">😲</div>
+                    <div class="emotion-label">びっくり</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 嫌悪・拒絶系 -->
+        <div class="category-section disgust">
+            <div class="category-title">嫌悪・拒絶系</div>
+            <div class="emotion-grid">
+                <div class="emotion-card">
+                    <div class="emotion-face">🤮</div>
+                    <div class="emotion-label">嫌だ</div>
+                </div>
+                <div class="emotion-card">
+                    <div class="emotion-face">🚫</div>
+                    <div class="emotion-label">これはいらない</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 悲しみ・苦痛系 -->
+        <div class="category-section sadness">
+            <div class="category-title">悲しみ・苦痛系</div>
+            <div class="emotion-grid">
+                <div class="emotion-card">
+                    <div class="emotion-face">😢</div>
+                    <div class="emotion-label">悲しい</div>
+                </div>
+                <div class="emotion-card">
+                    <div class="emotion-face">😣</div>
+                    <div class="emotion-label">つらい</div>
+                </div>
+            </div>
+        </div>
     </div>
-
+    </div>
+    
     <!-- LIFF SDKを読み込む -->
     <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script>
+    async function main() {
+        await liff.init({ liffId: "2007626363-DNnJmy4Z" });
 
-    <script>
-        // メインの処理を非同期関数として定義
-        async function main() {
-            // LIFFを初期化
-            // ここにあなたのLIFF IDを入力してください
-            await liff.init({ liffId: "2007626363-DNnJmy4Z" });
+        if (!liff.isLoggedIn()) {
+            liff.login();
+            return;
+        }
 
-            // LINEにログインしているかチェック
-            if (!liff.isLoggedIn()) {
-                // ログインしていなければ、ログインを促す
-                liff.login();
-                return; // ログイン処理に移行するため、ここで処理を中断
-            }
+        document.getElementById('loading').classList.add('hidden');
+        document.getElementById('content').classList.remove('hidden');
 
-            // 読み込み表示を消して、コンテンツを表示
-            document.getElementById('loading').classList.add('hidden');
-            document.getElementById('content').classList.remove('hidden');
+    }
 
-            // すべてのimg要素を取得
-            const images = document.querySelectorAll('img');
+    main();
 
-            // 各画像にクリックイベントを設定
-            images.forEach(image => {
-                image.addEventListener('click', async () => {
-                    const message = image.dataset.message;
-
-                    try {
+        // カードクリック時のインタラクション
+    document.querySelectorAll('.emotion-card').forEach(card => {
+        card.addEventListener('click', async function () {
+            document.querySelectorAll('.emotion-card').forEach(c => {
+                c.style.transform = '';
+                c.style.boxShadow = '';
+                c.style.border = '2px solid #E9ECEF';
+            });
+                
+                // クリックされたカードを強調
+                this.style.transform = 'scale(1.05)';
+                this.style.boxShadow = '0 12px 35px rgba(78, 205, 196, 0.4)';
+                this.style.border = '3px solid #4ECDC4';
+                
+                // 選択した感情をコンソールに表示
+                const emotion = this.querySelector('.emotion-label').textContent;
+                
+                try {
                         // メッセージを送信
                         await liff.sendMessages([
                             {
                                 type: 'text',
-                                text: message
+                                text: '選択された感情: ${emotion}'
                             }
                         ]);
                         // 送信後にLIFFウィンドウを閉じる
@@ -68,13 +540,27 @@
                         console.error(error);
                         window.alert('メッセージの送信に失敗しました。');
                     }
-                });
-            });
-        }
 
-        // 実行
-        main();
+
+            });
+        });
+        
+        // カードにホバー効果を追加
+        document.querySelectorAll('.emotion-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                if (!this.style.transform.includes('scale')) {
+                    this.style.transform = 'translateY(-5px) rotate(1deg)';
+                }
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                if (!this.style.transform.includes('scale')) {
+                    this.style.transform = '';
+                }
+            });
+        });
     </script>
+
 
 </body>
 </html>
